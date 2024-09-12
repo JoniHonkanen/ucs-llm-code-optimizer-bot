@@ -3,40 +3,59 @@ from typing import Optional, TypedDict, Union, List
 from enum import Enum
 
 
-# Agents state
-class AgentState(TypedDict):
-    messages: List[str]
-    code: str
-    code_execution_command: str
+class CodeImprovement(BaseModel):
+    """
+    Represents a specific improvement applied to a piece of code.
+    """
 
-
-class ImpactLevel(str, Enum):
-    HIGH = "High"
-    MEDIUM = "Medium"
-    LOW = "Low"
-
-
-class CodeOptimizationSuggestion(BaseModel):
     description: str = Field(
-        description="Detailed description of the code optimization suggestion."
+        description="A detailed explanation of the improvement and its purpose."
     )
-    impact: Optional[ImpactLevel] = Field(
-        None, description="The estimated impact of the optimization on the code."
+    changes_summary: str = Field(
+        description="Summary of the changes made to the original code as part of this improvement."
     )
+    success: bool = Field(
+        description="Indicates whether the improvement was successfully applied without errors."
+    )
+    complexity_reduction: float = Field(
+        description="Reduction in time complexity or runtime performance, expressed as a factor (e.g., 0.5 means 50% reduction)."
+    )
+    updated_code: str = Field(
+        description="The code after applying the improvement. Newlines should not be added explicitly using '\\n'."
+    )
+    run_time: Optional[float] = Field(
+        None,
+        description="This will be tested later, so it is not required to be filled in.",
+    )
+    test_description: str = Field(
+        description="A concise note on what was optimized (e.g., algorithm change) to avoid repeating similar improvements."
+    )
+    run_command: str = Field(
+        description="The full command to execute the code/function in a python subprocess"
+    )
+
+
+class OriginalCodeAnalyze(BaseModel):
+    description: str = Field(description="Detailed description of the code.")
     actionable_suggestion: str = Field(
         description="The specific, actionable suggestion for optimizing the code."
     )
-    category: Optional[str] = Field(
-        None,
-        description="The category of the suggestion (e.g., 'Performance', 'Memory', 'Readability').",
-    )
-    complexity: Optional[dict] = Field(
+    complexity: str = Field(
         None,
         description="The complexity analysis of the code, including time and/or space complexity.",
-        example={"type": "Time Complexity", "before": "O(n^2)", "after": "O(n log n)"},
     )
-    run_command: List[str] = Field(
-        description="The command as a list to run the original code in a subprocess for any language. "
-                    "Example for Python: ['python', '-c', '<code>'], for JavaScript: ['node', '<file.js>'], "
-                    "for Java: ['java', '<file.class>'], for C: ['gcc', '<file.c>', '-o', 'output_file']"
+    run_command: str = Field(
+        description="The full command to execute the code/function in a python subprocess"
     )
+
+
+# Agents state
+class AgentState(TypedDict):
+    original_code: str
+    original_run_time: float
+    code_execution_command: str
+    improved_code: CodeImprovement
+    top_improvements: List[CodeImprovement]
+    tested_improvements: List[str]
+    messages: List[str]
+    iteration: int
