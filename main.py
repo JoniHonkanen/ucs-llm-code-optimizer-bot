@@ -43,17 +43,18 @@ workflow.add_node("improver", improve_code_f)
 
 # Edges
 workflow.add_edge("analyzer", "measurer")
-workflow.add_edge("measurer", "improver")
+
 
 
 def improve(state: AgentState):
-    if state["iteration"] < 2:
-        return "measurer"
+    if state["iteration"] < 3:
+        return "improver"
     else:
         return END
 
-
-workflow.add_conditional_edges("improver", improve)
+workflow.add_conditional_edges("measurer", improve)
+workflow.add_edge("improver", "measurer")
+#workflow.add_conditional_edges("improver", improve)
 
 # conditional edges
 
@@ -85,12 +86,40 @@ grades = [85, 92, 88, 91, 76]
 top_students = find_top_students(students, grades)
 print(top_students)"""
 
+optimize_me2 = """
+function findTopStudents(students, grades) {
+    // Combine student names with their grades
+    let studentGrades = [];
+    for (let i = 0; i < students.length; i++) {
+        studentGrades.push([students[i], grades[i]]);
+    }
+
+    // Sort students by their grades in descending order
+    for (let i = 0; i < studentGrades.length; i++) {
+        for (let j = i + 1; j < studentGrades.length; j++) {
+            if (studentGrades[i][1] < studentGrades[j][1]) {
+                [studentGrades[i], studentGrades[j]] = [studentGrades[j], studentGrades[i]];
+            }
+        }
+    }
+
+    // Return the top 3 students
+    return studentGrades.slice(0, 3);
+}
+
+let students = ["Alice", "Bob", "Charlie", "David", "Eve"];
+let grades = [85, 92, 88, 91, 76];
+
+let topStudents = findTopStudents(students, grades);
+console.log(topStudents);
+"""
+
 res = app.invoke(
     {
         "messages": [
-            HumanMessage(content=optimize_me),
+            HumanMessage(content=optimize_me2),
         ],
-        "original_code": optimize_me,
+        "original_code": optimize_me2,
         "iteration": 0,
     }
 )

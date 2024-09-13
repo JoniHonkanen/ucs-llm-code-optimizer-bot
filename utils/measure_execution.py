@@ -4,9 +4,11 @@ def measure_execution_time(code: str, execution_command: str) -> float:
 
     # Measure execution time
     start_time = time.time()
-    result = subprocess.run(execution_command)
-    end_time = time.time()
 
+    # Use shell=True if execution_command is a string
+    result = subprocess.run(execution_command, shell=True)
+
+    end_time = time.time()
     execution_time = end_time - start_time
 
     if result.returncode == 0:

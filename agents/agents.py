@@ -3,6 +3,7 @@ from prompts.prompts import (
     CODE_ANALYSIS_PROMPT,
     CODE_OPTIMIZATION_SUGGESTION_PROMPT,
     OPTIMIZE_OPTIMIZED_CODE_PROMPT,
+    FINAL_REPORT_AGENT_PROMPT,
 )
 from utils.measure_execution import measure_execution_time
 
@@ -13,7 +14,6 @@ def code_analyzer_agent(state: AgentState, llm) -> AgentState:
     structured_llm = llm.with_structured_output(OriginalCodeAnalyze)
     prompt = CODE_ANALYSIS_PROMPT.format(original_code=state["original_code"])
     res = structured_llm.invoke(prompt)
-    print("\n\nTÄÄ KIINNOSTAA: ", res, "\n\n")
     state["code_execution_command"] = res.run_command
     return state
 
@@ -63,8 +63,10 @@ def code_improver_agent(state: AgentState, llm) -> AgentState:
         # if not first loop, improved code is the improved code from previous loop
         print("OPTIMIZE OPTIMIZED CODE")
         prompt = OPTIMIZE_OPTIMIZED_CODE_PROMPT.format(
-            optimized_code=state["improved_code"],
+            optimized_code=state["improved_code"].updated_code,
             optimized_code_run_time=state["improved_code"].run_time,
+            summary_of_last_change=state["improved_code"].changes_summary,
+            tested_improvements=state["tested_improvements"],
             code=state["original_code"],
             original_run_time=state["original_run_time"],
         )
@@ -75,13 +77,18 @@ def code_improver_agent(state: AgentState, llm) -> AgentState:
             code=state["original_code"], original_run_time=state["original_run_time"]
         )
 
+    print("TÄSSÄ PROMPTTI!!!!!!!!!!!:")
+    print(prompt)
+
     res = structured_llm.invoke(prompt)
     state["improved_code"] = res
-    print(res)
     # Ensure 'tested_improvements' key exists
     if "tested_improvements" not in state:
         state["tested_improvements"] = []
     state["tested_improvements"].append(res.test_description)
-    print(state["tested_improvements"])
 
     return state
+
+
+def final_report_agent(state: AgentState) -> AgentState:
+    print("\n** FINAL REPORT AGENT **")
