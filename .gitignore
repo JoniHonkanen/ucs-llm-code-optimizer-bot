@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# folder where best improvements are stored
+improvements/
+
 # C extensions
 *.so
 

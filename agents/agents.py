@@ -1,4 +1,5 @@
-from schemas import AgentState, OriginalCodeAnalyze, CodeImprovement
+import os
+from schemas import AgentState, OriginalCodeAnalyze, CodeImprovement, FinalReport
 from prompts.prompts import (
     CODE_ANALYSIS_PROMPT,
     CODE_OPTIMIZATION_SUGGESTION_PROMPT,
@@ -90,5 +91,43 @@ def code_improver_agent(state: AgentState, llm) -> AgentState:
     return state
 
 
-def final_report_agent(state: AgentState) -> AgentState:
-    print("\n** FINAL REPORT AGENT **")
+def final_report_agent(state: AgentState, llm) -> AgentState:
+    print("\n\n** FINAL REPORT AGENT **")
+    bestImprovements = state["top_improvements"]
+    bestImprovementsForLLM = []
+
+    # Improvements for better format, easier to read (LLM)
+    for index, improvement in enumerate(bestImprovements, start=1):
+        bestImprovementsForLLM.append(
+            f"Improvement {index}:\n"
+            f"Description: {improvement.description}\n"
+            f"Changes Summary: {improvement.changes_summary}\n"
+            f"Execution Time: {improvement.run_time} seconds\n"
+            f"Updated Code:\n{improvement.updated_code}\n"
+        )
+
+    print(bestImprovementsForLLM)
+
+    structured_llm = llm.with_structured_output(FinalReport)
+    prompt = FINAL_REPORT_AGENT_PROMPT.format(
+        top_improvements=bestImprovementsForLLM,
+        original_code=state["original_code"],
+    )
+    res = structured_llm.invoke(prompt)
+    state["final"] = res
+
+    # Ensure the 'improvements' folder exists
+    improvements_folder = "improvements"
+    os.makedirs(improvements_folder, exist_ok=True)
+
+    # Save the final report to the improvements folder using res.filename
+    filepath = os.path.join(improvements_folder, res.filename)
+
+    # save the final report to a programming file using res.filename
+    with open(filepath, "w") as f:
+        # Add comments at the beginning of the file
+        f.write(f"# Best Improvement Description: {res.best_improvement_description}\n")
+        f.write(f"# Performance Gain: {res.performance_gain}\n\n")
+        f.write(res.selected_code)
+
+    return state

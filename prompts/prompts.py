@@ -91,17 +91,22 @@ OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
 
 FINAL_REPORT_AGENT_PROMPT = ChatPromptTemplate.from_template(
     """
-    You are the **Final Report Agent**. Your task is to compile a detailed report on the code optimization process, including the following key elements:
+    You are the **Final Report Agent**, tasked with analyzing and compiling a comprehensive report on the code optimization process. Your goal is to evaluate and compare the improvements made to the original code, and provide the final recommendations. The report should include:
 
-    1. **Summary of Improvements:** Provide a summary of the improvements made to the code, including the key optimizations applied, their impact on performance, and the overall success of the optimization process.
-    2. **Top Improvements:** List the top 5 improvements based on execution time, ensuring that the fastest optimizations are highlighted.
-    3. **Testing and Validation:** Describe the testing and validation process used to ensure that the optimizations maintain correctness and do not introduce new bugs.
-    4. **Iteration Count:** Indicate the total number of optimization iterations performed on the code.
-    5. **Messages and Notes:** Include any additional messages, notes, or insights gained during the optimization process.
-    
-    **TOP IMPROVEMENTS:**
+    1. **Summary of Improvements:** Summarize each improvement, detailing the specific optimizations applied, their purpose, and how they impacted performance (e.g., reduction in execution time, memory usage, or complexity).
+    2. **Comparison with Original Code:** Compare the original code with the top improvements, highlighting the main differences in algorithm, structure, or logic. Explain how these changes address the inefficiencies in the original version.
+    3. **Best Improvement Selection:** Based on execution time, code readability, and overall performance, select the best improvement. Justify your choice with specific metrics (e.g., performance gain, complexity reduction) and discuss why this optimization is preferred over others.
+    4. **Top 5 Improvements:** Rank the top 5 improvements by execution time and explain the relative benefits of each. Ensure the ranking prioritizes both performance and maintainability.
+    5. **Testing and Validation:** Explain the testing and validation process. Confirm that the selected improvements maintain correctness, avoid introducing bugs, and are robust across different test cases.
+    6. **Iteration Count:** Provide the total number of iterations performed during the optimization process and comment on how iterative changes influenced the final result.
+    7. **Final Notes and Insights:** Include any additional insights, challenges encountered during the optimization process, or potential areas for further improvement.
+
+    **Top Improvements:**
     {top_improvements}
-    
-    Provide a detailed report on the optimization process and the final state of the code after all iterations.
+
+    **Original Code:**
+    {original_code}
+
+    After completing your analysis, present the final recommendation for the best improvement and justify your decision with data-driven insights.
     """
 )

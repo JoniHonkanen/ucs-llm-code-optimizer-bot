@@ -7,7 +7,12 @@ from dotenv import load_dotenv
 
 # own imports
 from schemas import AgentState
-from agents.agents import code_analyzer_agent, code_measurer_agent, code_improver_agent
+from agents.agents import (
+    code_analyzer_agent,
+    code_measurer_agent,
+    code_improver_agent,
+    final_report_agent,
+)
 
 # .env file is used to store the api key
 load_dotenv()
@@ -36,28 +41,30 @@ def improve_code_f(state: AgentState):
     return code_improver_agent(state, llm)
 
 
+def final_report_f(state: AgentState):
+    return final_report_agent(state, llm)
+
+
 # Nodes
 workflow.add_node("analyzer", analyze_code_f)
 workflow.add_node("measurer", measure_code_f)
 workflow.add_node("improver", improve_code_f)
+workflow.add_node("report", final_report_f)
 
 # Edges
 workflow.add_edge("analyzer", "measurer")
-
 
 
 def improve(state: AgentState):
     if state["iteration"] < 3:
         return "improver"
     else:
-        return END
+        return "report"
+
 
 workflow.add_conditional_edges("measurer", improve)
 workflow.add_edge("improver", "measurer")
-#workflow.add_conditional_edges("improver", improve)
-
-# conditional edges
-
+workflow.add_edge("report", END)
 
 # Set entry point
 workflow.set_entry_point("analyzer")

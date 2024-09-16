@@ -49,6 +49,23 @@ class OriginalCodeAnalyze(BaseModel):
     )
 
 
+class FinalReport(BaseModel):
+    """
+    Represents the final report on the code optimization process.
+    """
+
+    best_improvement_description: str = Field(
+        description="Description of why the chosen optimized code was selected."
+    )
+    selected_code: str = Field(
+        description="The optimized code that was selected as the best improvement."
+    )
+    performance_gain: str = Field(
+        description="The performance gain achieved with the selected code."
+    )
+    filename: str = Field(description="Good filename for the code.")
+
+
 # Agents state
 class AgentState(TypedDict):
     original_code: str
@@ -59,3 +76,4 @@ class AgentState(TypedDict):
     tested_improvements: List[str]
     messages: List[str]
     iteration: int
+    final: FinalReport
