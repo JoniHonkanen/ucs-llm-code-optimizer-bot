@@ -55,15 +55,17 @@ class FinalReport(BaseModel):
     """
 
     best_improvement_description: str = Field(
-        description="Description of why the chosen optimized code was selected."
+        description="Description of why the chosen optimized code was selected, formatted as a comment for the specified programming language (e.g., '// for JavaScript, # for Python')."
     )
     selected_code: str = Field(
         description="The optimized code that was selected as the best improvement."
     )
     performance_gain: str = Field(
-        description="The performance gain achieved with the selected code."
+        description="The performance gain achieved with the selected code, formatted as a comment for the specified programming language (e.g., '// for JavaScript, # for Python')."
     )
-    filename: str = Field(description="Good filename for the code.")
+    filename: str = Field(
+        description="A good filename for the code, possibly reflecting the programming language."
+    )
 
 
 # Agents state

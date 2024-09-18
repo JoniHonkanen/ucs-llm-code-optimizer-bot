@@ -52,8 +52,6 @@ def code_measurer_agent(state: AgentState) -> AgentState:
     # Increment the iteration count
     state["iteration"] += 1
 
-    print("\nTOP IMPROVEMENTS:")
-    print(state["top_improvements"])
     return state
 
 
@@ -62,7 +60,6 @@ def code_improver_agent(state: AgentState, llm) -> AgentState:
     structured_llm = llm.with_structured_output(CodeImprovement)
     if "improved_code" in state and state["improved_code"] is not None:
         # if not first loop, improved code is the improved code from previous loop
-        print("OPTIMIZE OPTIMIZED CODE")
         prompt = OPTIMIZE_OPTIMIZED_CODE_PROMPT.format(
             optimized_code=state["improved_code"].updated_code,
             optimized_code_run_time=state["improved_code"].run_time,
@@ -72,14 +69,10 @@ def code_improver_agent(state: AgentState, llm) -> AgentState:
             original_run_time=state["original_run_time"],
         )
     else:
-        ("OPTIMIZE ORIGINAL CODE")
         # if first loop, improved code is the original code
         prompt = CODE_OPTIMIZATION_SUGGESTION_PROMPT.format(
             code=state["original_code"], original_run_time=state["original_run_time"]
         )
-
-    print("TÄSSÄ PROMPTTI!!!!!!!!!!!:")
-    print(prompt)
 
     res = structured_llm.invoke(prompt)
     state["improved_code"] = res
@@ -106,8 +99,6 @@ def final_report_agent(state: AgentState, llm) -> AgentState:
             f"Updated Code:\n{improvement.updated_code}\n"
         )
 
-    print(bestImprovementsForLLM)
-
     structured_llm = llm.with_structured_output(FinalReport)
     prompt = FINAL_REPORT_AGENT_PROMPT.format(
         top_improvements=bestImprovementsForLLM,
@@ -126,8 +117,8 @@ def final_report_agent(state: AgentState, llm) -> AgentState:
     # save the final report to a programming file using res.filename
     with open(filepath, "w") as f:
         # Add comments at the beginning of the file
-        f.write(f"# Best Improvement Description: {res.best_improvement_description}\n")
-        f.write(f"# Performance Gain: {res.performance_gain}\n\n")
+        f.write(f"{res.best_improvement_description}\n")
+        f.write(f"{res.performance_gain}\n\n")
         f.write(res.selected_code)
 
     return state
