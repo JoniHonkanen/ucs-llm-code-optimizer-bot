@@ -4,7 +4,7 @@ CODE_ANALYSIS_PROMPT = ChatPromptTemplate.from_template(
     """
     You are an expert in code analysis, optimization, and cross-language execution. Your task is to analyze the provided code, identify its programming language, and evaluate its structure, performance, and potential inefficiencies.
 
-    The code will be executed and tested in a Python environment using the `subprocess` module, without writing the code to any files. You must understand how `subprocess` works and generate a suitable script that can be executed directly from memory.
+    The code will be executed and tested in a Python environment using the `subprocess` module. You must generate a suitable script that can be written to a file and executed from that file, matching the detected programming language.
 
     Provide a detailed analysis of:
     1. The programming language used.
@@ -18,14 +18,16 @@ CODE_ANALYSIS_PROMPT = ChatPromptTemplate.from_template(
     - Readability and maintainability.
     - Any refactoring or alternative approaches that could optimize performance.
 
-    Finally, explain how to execute the code directly in Python's `subprocess` using an in-memory approach, without writing to external files. Generate a working execution command for the identified programming language. Example commands include:
+    Finally, based on the identified programming language, provide an exact execution command that can be used in Python's `subprocess` module. The command should reference a temporary file where the code is written before execution. 
 
-    - For Python: `python -c "<code_as_string>"`
-    - For Java: `java -e "<code_as_string>"`
-    - For C: `gcc -x c - -o - -e "<code_as_string>"`
-    - For JavaScript (Node.js): `node -e "<code_as_string>"`
+    The execution command should take into account the programming language, examples include:
+    
+    - For Python: `python <filepath>`
+    - For Java: `javac <filepath> && java <compiled_class>`
+    - For C: `gcc <filepath> -o <output_binary> && ./<output_binary>`
+    - For JavaScript (Node.js): `node <filepath>`
 
-    Focus on embedding the code inside the execution command itself and ensure the command is compatible with Python's subprocess module for execution.
+    Focus on ensuring that the code is written to a file and executed using that file. The command must be compatible with Python's subprocess module for file-based execution.
 
     Analyze this code:
     {original_code}
@@ -43,49 +45,81 @@ CODE_OPTIMIZATION_SUGGESTION_PROMPT = ChatPromptTemplate.from_template(
     {code}
     
     Orginal code execution time was {original_run_time} seconds, so try to be better than that.
+    
+    Here is the **original code execution command** that was successfully executed. You must derive a similar execution command for the optimized code, ensuring it runs successfully:
+    {original_code_execution}
     """
 )
 
-# Create a prompt template, topic is a variable
 OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
     """
-    You are a highly skilled code optimization expert. Your task is to analyze the provided code, identify its inefficiencies, and propose further optimizations based on an understanding of the differences between the original code and the optimized version. Your goal is to achieve the best possible performance while maintaining correctness and functionality.
+    You are a code optimization expert tasked with further optimizing the provided code. Your goal is to maximize performance without compromising correctness or functionality. Review the optimizations made so far and propose more improvements.
 
-    **Key Points to Address:**
-    1. **Identify Bottlenecks:** Use profiling and performance benchmarking techniques to identify where the current optimized code is still slow or inefficient.
-    2. **Complexity Analysis:** Provide an analysis of the time and space complexity of both the original and the optimized code. Include the new optimizations you propose and their respective complexities.
-    3. **Advanced Optimization Techniques:** Focus on techniques such as:
-       - More efficient algorithms for common operations (sorting, searching, etc.).
-       - Improved data structures to minimize memory and processing overhead.
-       - Refactorings or algorithmic changes that minimize redundant operations.
-    4. **Consider Multiple Approaches:** Where appropriate, suggest alternative strategies and compare their performance, complexity, and trade-offs. Choose the most effective optimization approach.
-    5. **Testing and Validation:** Ensure that all optimizations maintain the correctness of the code, handle edge cases properly, and do not introduce bugs.
-    6. **Trade-offs:** Identify potential trade-offs between performance improvements, readability, and maintainability. Ensure that the proposed optimizations strike a balance where necessary.
+    **Your Key Responsibilities:**
     
-    Here is the **optimized code** from the previous iteration:
-    {optimized_code}
+    1. **Identify Bottlenecks**:
+       Use profiling or benchmarking data to identify areas of the current optimized code that are still inefficient.
     
-    The execution time of the optimized code was **{optimized_code_run_time} seconds**. Your task is to optimize it further and aim for an even faster execution time while considering all the above factors.
+    2. **Complexity Analysis**:
+       Provide a detailed complexity analysis (time and space) of both the original and optimized code. For each new optimization you propose, include the impact on complexity.
     
-    This is the **summary of the last change**: {summary_of_last_change}
+    3. **Advanced Optimization Techniques**:
+       Focus on improvements in:
+       - Algorithm efficiency (sorting, searching, data handling, etc.).
+       - Data structures that reduce memory usage and computation overhead.
+       - Refactoring to remove redundancies or unnecessary operations.
+
+    4. **Compare Multiple Approaches**:
+       Where applicable, propose alternative solutions, comparing their performance, complexity, and trade-offs. Always aim to choose the most effective approach.
+
+    5. **Testing & Validation**:
+       Ensure all optimizations are rigorously tested for correctness, edge case handling, and the absence of new bugs.
     
-    Here is list of tested improvements so far: {tested_improvements}
+    6. **Trade-offs**:
+       Consider the trade-offs between performance, code readability, and maintainability. Prioritize significant performance gains over minor readability issues, but avoid making the code unmanageable.
 
-    For context, this was the **original code**:
-    {code}
+    **Provided Code Details:**
     
-    The original code executed in **{original_run_time} seconds**. Make sure that your new optimizations go beyond both the original and previously optimized versions.
+    - **Optimized Code**: 
+      {optimized_code}
 
-    Additionally, explain how the optimized code can be executed directly in a Python subprocess without writing any files. Provide a working example of how the code can be executed directly in memory, based on the programming language. Examples include:
+    - **Execution Time (Optimized)**: 
+      {optimized_code_run_time} seconds
 
-    - For Python: `python -c "<code_as_string>"`
-    - For Java: `java -e "<code_as_string>"`
-    - For C: `gcc -x c - -o - -e "<code_as_string>"`
-    - For JavaScript (Node.js): `node -e "<code_as_string>"`
+    - **Summary of Last Change**: 
+      {summary_of_last_change}
+    
+    - **Tested Improvements So Far**: 
+      {tested_improvements}
 
-    Focus on embedding the code in the execution command itself and ensure compatibility with Python's subprocess module.
+    - **Original Code**: 
+      {code}
+    
+    - **Original Execution Time**: 
+      {original_run_time} seconds
+    
+    - **Original Execution Command**: 
+      {original_code_execution}
 
-    **Finally, benchmark the new optimizations and provide an estimate of the expected execution time.**
+    **Next Steps**:
+    
+    1. Propose and explain optimizations to improve the current performance.
+    
+    2. Derive a new execution command for running the optimized code. You must:
+       - Base it on the original execution command but adapt it for the optimized code.
+       - Ensure the command is valid and executable from a file.
+
+       **Examples of execution commands**:
+       - Python: `python <filepath>`
+       - Java: `javac <filepath> && java <compiled_class>`
+       - C: `gcc <filepath> -o <output_binary> && ./<output_binary>`
+       - JavaScript: `node <filepath>`
+
+    3. Ensure the command is suitable for running in a subprocess, and the code is executed from a file.
+
+    **Benchmark the New Optimizations**:
+    
+    Provide an estimate of the expected execution time for your new optimizations compared to both the original and the currently optimized versions.
     """
 )
 
@@ -108,5 +142,20 @@ FINAL_REPORT_AGENT_PROMPT = ChatPromptTemplate.from_template(
     {original_code}
 
     After completing your analysis, present the final recommendation for the best improvement and justify your decision with data-driven insights.
+    """
+)
+
+FIX_EXECUTION_COMMAND_PROMPT = ChatPromptTemplate.from_template(
+    """
+    For some reason, the execution command provided is not working as expected. Please review the command and ensure that it is correctly formatted for execution using Python's `subprocess` module. The command should be able to execute the code from a file rather than from memory.
+
+    If the first execution attempt does not work, analyze the issue and propose a fix.
+
+    **Important**: The placeholder `<filepath>` must be included in the execution command, as it will later be replaced with the real file path during execution.
+
+    Here is the runnable code snippet that needs to be fixed:
+    {runnable_code}
+
+    Please ensure that after any necessary corrections, the command will work as expected.
     """
 )

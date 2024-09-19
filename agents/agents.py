@@ -1,21 +1,29 @@
 import os
-from schemas import AgentState, OriginalCodeAnalyze, CodeImprovement, FinalReport
+from schemas import (
+    AgentState,
+    OriginalCodeAnalyze,
+    CodeImprovement,
+    FinalReport,
+    FixExecutionCommand,
+)
 from prompts.prompts import (
     CODE_ANALYSIS_PROMPT,
     CODE_OPTIMIZATION_SUGGESTION_PROMPT,
     OPTIMIZE_OPTIMIZED_CODE_PROMPT,
     FINAL_REPORT_AGENT_PROMPT,
+    FIX_EXECUTION_COMMAND_PROMPT,
 )
 from utils.measure_execution import measure_execution_time
 
 
-#
+# Analyzes the code and provides suggestions for improvement
 def code_analyzer_agent(state: AgentState, llm) -> AgentState:
     print("\n** CODE ANALYZER AGENT **")
     structured_llm = llm.with_structured_output(OriginalCodeAnalyze)
     prompt = CODE_ANALYSIS_PROMPT.format(original_code=state["original_code"])
     res = structured_llm.invoke(prompt)
     state["code_execution_command"] = res.run_command
+    state["file_extension"] = res.file_extension
     return state
 
 
@@ -31,7 +39,9 @@ def code_measurer_agent(state: AgentState) -> AgentState:
     if "improved_code" in state and state["improved_code"] is not None:
         # Measure the execution time of the improved code
         state["improved_code"].run_time = measure_execution_time(
-            state["improved_code"].updated_code, state["improved_code"].run_command
+            state["improved_code"].updated_code,
+            state["improved_code"].run_command,
+            state["file_extension"],
         )
 
         # Update top improvements if it's either one of the top 5 fastest or fewer than 5 improvements exist
@@ -45,9 +55,18 @@ def code_measurer_agent(state: AgentState) -> AgentState:
 
     else:
         # If no improvements have been made, measure the original code's execution time
-        state["original_run_time"] = measure_execution_time(
-            state["original_code"], state["code_execution_command"]
+        measure = measure_execution_time(
+            state["original_code"],
+            state["code_execution_command"],
+            state["file_extension"],
         )
+        if measure > 0:
+            state["original_run_time"] = measure
+            state["original_execution_success"] = True
+        else:
+            print("EPÄONNISTUI")
+            state["original_run_time"] = 0
+            state["original_execution_success"] = False
 
     # Increment the iteration count
     state["iteration"] += 1
@@ -62,6 +81,7 @@ def code_improver_agent(state: AgentState, llm) -> AgentState:
         # if not first loop, improved code is the improved code from previous loop
         prompt = OPTIMIZE_OPTIMIZED_CODE_PROMPT.format(
             optimized_code=state["improved_code"].updated_code,
+            original_code_execution=state["code_execution_command"],
             optimized_code_run_time=state["improved_code"].run_time,
             summary_of_last_change=state["improved_code"].changes_summary,
             tested_improvements=state["tested_improvements"],
@@ -71,7 +91,9 @@ def code_improver_agent(state: AgentState, llm) -> AgentState:
     else:
         # if first loop, improved code is the original code
         prompt = CODE_OPTIMIZATION_SUGGESTION_PROMPT.format(
-            code=state["original_code"], original_run_time=state["original_run_time"]
+            code=state["original_code"],
+            original_run_time=state["original_run_time"],
+            original_code_execution=state["code_execution_command"],
         )
 
     res = structured_llm.invoke(prompt)
@@ -105,6 +127,7 @@ def final_report_agent(state: AgentState, llm) -> AgentState:
         original_code=state["original_code"],
     )
     res = structured_llm.invoke(prompt)
+    print(res)
     state["final"] = res
 
     # Ensure the 'improvements' folder exists
@@ -120,5 +143,17 @@ def final_report_agent(state: AgentState, llm) -> AgentState:
         f.write(f"{res.best_improvement_description}\n")
         f.write(f"{res.performance_gain}\n\n")
         f.write(res.selected_code)
+
+    return state
+
+
+def fix_execution_agent(state: AgentState, llm) -> AgentState:
+    print("\n\n** FIX EXECUTION AGENT **")
+    structured_llm = llm.with_structured_output(FixExecutionCommand)
+    prompt = FIX_EXECUTION_COMMAND_PROMPT.format(
+        runnable_code=state["code_execution_command"]
+    )
+    res = structured_llm.invoke(prompt)
+    state["code_execution_command"] = res.new_execution_command
 
     return state

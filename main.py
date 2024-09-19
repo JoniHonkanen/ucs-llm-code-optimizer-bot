@@ -12,6 +12,7 @@ from agents.agents import (
     code_measurer_agent,
     code_improver_agent,
     final_report_agent,
+    fix_execution_agent,
 )
 
 # .env file is used to store the api key
@@ -45,24 +46,30 @@ def final_report_f(state: AgentState):
     return final_report_agent(state, llm)
 
 
+def fix_execution_agent_f(state: AgentState):
+    return fix_execution_agent(state, llm)
+
+
 # Nodes
 workflow.add_node("analyzer", analyze_code_f)
 workflow.add_node("measurer", measure_code_f)
+workflow.add_node("fix_execution", fix_execution_agent_f)
 workflow.add_node("improver", improve_code_f)
 workflow.add_node("report", final_report_f)
 
 # Edges
 workflow.add_edge("analyzer", "measurer")
 
-
-def improve(state: AgentState):
-    if state["iteration"] < 3:
+def combined_condition(state: AgentState):
+    if state["original_execution_success"] and state["iteration"] < 3:
         return "improver"
-    else:
+    elif state["original_execution_success"]:
         return "report"
+    else:
+        return "fix_execution"
 
-
-workflow.add_conditional_edges("measurer", improve)
+workflow.add_conditional_edges("measurer", combined_condition)
+workflow.add_edge("fix_execution", "measurer")
 workflow.add_edge("improver", "measurer")
 workflow.add_edge("report", END)
 

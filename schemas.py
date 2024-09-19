@@ -3,6 +3,23 @@ from typing import Optional, TypedDict, Union, List
 from enum import Enum
 
 
+class OriginalCodeAnalyze(BaseModel):
+    description: str = Field(description="Detailed description of the code.")
+    actionable_suggestion: str = Field(
+        description="The specific, actionable suggestion for optimizing the code."
+    )
+    complexity: str = Field(
+        None,
+        description="The complexity analysis of the code, including time and/or space complexity.",
+    )
+    run_command: str = Field(
+        description="The full command to execute the code/function in a python subprocess"
+    )
+    file_extension: str = Field(
+        description="programming language extension for the code file"
+    )
+
+
 class CodeImprovement(BaseModel):
     """
     Represents a specific improvement applied to a piece of code.
@@ -35,20 +52,6 @@ class CodeImprovement(BaseModel):
     )
 
 
-class OriginalCodeAnalyze(BaseModel):
-    description: str = Field(description="Detailed description of the code.")
-    actionable_suggestion: str = Field(
-        description="The specific, actionable suggestion for optimizing the code."
-    )
-    complexity: str = Field(
-        None,
-        description="The complexity analysis of the code, including time and/or space complexity.",
-    )
-    run_command: str = Field(
-        description="The full command to execute the code/function in a python subprocess"
-    )
-
-
 class FinalReport(BaseModel):
     """
     Represents the final report on the code optimization process.
@@ -68,9 +71,18 @@ class FinalReport(BaseModel):
     )
 
 
+class FixExecutionCommand(BaseModel):
+    reason: str = Field(description="The reason why the code execution failed.")
+    new_execution_command: str = Field(
+        description="The new execution command to run the code successfully."
+    )
+
+
 # Agents state
 class AgentState(TypedDict):
     original_code: str
+    file_extension: str
+    original_execution_success: bool
     original_run_time: float
     code_execution_command: str
     improved_code: CodeImprovement
