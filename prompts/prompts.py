@@ -26,6 +26,8 @@ CODE_ANALYSIS_PROMPT = ChatPromptTemplate.from_template(
     - For Java: `javac <filepath> && java <compiled_class>`
     - For C: `gcc <filepath> -o <output_binary> && ./<output_binary>`
     - For JavaScript (Node.js): `node <filepath>`
+    
+    **Important**: The placeholder `<filepath>` must be included in the execution command, as it will later be replaced with the real file path during execution.
 
     Focus on ensuring that the code is written to a file and executed using that file. The command must be compatible with Python's subprocess module for file-based execution.
 
@@ -114,6 +116,8 @@ OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
        - Java: `javac <filepath> && java <compiled_class>`
        - C: `gcc <filepath> -o <output_binary> && ./<output_binary>`
        - JavaScript: `node <filepath>`
+       
+    **Important**: The placeholder `<filepath>` must be included in the execution command, as it will later be replaced with the real file path during execution.
 
     3. Ensure the command is suitable for running in a subprocess, and the code is executed from a file.
 
@@ -125,15 +129,19 @@ OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
 
 FINAL_REPORT_AGENT_PROMPT = ChatPromptTemplate.from_template(
     """
-    You are the **Final Report Agent**, tasked with analyzing and compiling a comprehensive report on the code optimization process. Your goal is to evaluate and compare the improvements made to the original code, and provide the final recommendations. The report should include:
+    You are the **Final Report Agent**, tasked with analyzing and compiling a comprehensive report on the code optimization process. Your goal is to evaluate and compare the improvements made to the original code, and provide the final recommendation for the best-optimized code among the top improvements. The report should include:
 
-    1. **Summary of Improvements:** Summarize each improvement, detailing the specific optimizations applied, their purpose, and how they impacted performance (e.g., reduction in execution time, memory usage, or complexity).
-    2. **Comparison with Original Code:** Compare the original code with the top improvements, highlighting the main differences in algorithm, structure, or logic. Explain how these changes address the inefficiencies in the original version.
-    3. **Best Improvement Selection:** Based on execution time, code readability, and overall performance, select the best improvement. Justify your choice with specific metrics (e.g., performance gain, complexity reduction) and discuss why this optimization is preferred over others.
-    4. **Top 5 Improvements:** Rank the top 5 improvements by execution time and explain the relative benefits of each. Ensure the ranking prioritizes both performance and maintainability.
-    5. **Testing and Validation:** Explain the testing and validation process. Confirm that the selected improvements maintain correctness, avoid introducing bugs, and are robust across different test cases.
-    6. **Iteration Count:** Provide the total number of iterations performed during the optimization process and comment on how iterative changes influenced the final result.
-    7. **Final Notes and Insights:** Include any additional insights, challenges encountered during the optimization process, or potential areas for further improvement.
+    1. **Summary of Improvements:** Summarize each of the top improvements, detailing the specific optimizations applied, their purpose, and how they impacted performance (e.g., reduction in execution time, memory usage, or complexity).
+
+    2. **Comparison with Original Code:** Compare the original code with each of the top improvements, highlighting the main differences in algorithm, structure, or logic. Explain how these changes address the inefficiencies in the original version.
+
+    3. **Best Improvement Selection:** Based on execution time, memory usage, code readability, simplicity, and overall performance, select the best improvement. Justify your choice with specific metrics (e.g., performance gain, memory efficiency, simplicity, correctness) and explain how it strikes the best balance between these factors. 
+    For example: "This improvement strikes the best balance between simplicity, performance, and correctness. It is the most appropriate choice for efficiently solving the problem while maintaining readability and robustness."
+    Discuss why this improvement is preferred over others, supported by data-driven insights.
+
+    4. **Ranking of Improvements:** Rank the top improvements by execution time, memory usage, and overall performance. Explain the relative benefits of each, considering the trade-offs between performance, memory efficiency, and maintainability. Ensure the ranking prioritizes both computational efficiency and code maintainability.
+
+    5. **Testing and Validation:** Explain the testing and validation process. Confirm that the selected improvement maintains correctness, avoids introducing bugs, and is robust across different test cases.
 
     **Top Improvements:**
     {top_improvements}
@@ -141,7 +149,7 @@ FINAL_REPORT_AGENT_PROMPT = ChatPromptTemplate.from_template(
     **Original Code:**
     {original_code}
 
-    After completing your analysis, present the final recommendation for the best improvement and justify your decision with data-driven insights.
+    After completing your analysis, present your final recommendation for the best improvement and justify your decision with data-driven insights.
     """
 )
 
