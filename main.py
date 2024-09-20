@@ -14,6 +14,7 @@ from agents.agents import (
     final_report_agent,
     fix_execution_agent,
 )
+from optimize_functions import optimize_me, optimize_me2, optimize_me3
 
 # .env file is used to store the api key
 load_dotenv()
@@ -60,6 +61,7 @@ workflow.add_node("report", final_report_f)
 # Edges
 workflow.add_edge("analyzer", "measurer")
 
+
 def combined_condition(state: AgentState):
     if state["original_execution_success"] and state["iteration"] < 3:
         return "improver"
@@ -67,6 +69,7 @@ def combined_condition(state: AgentState):
         return "report"
     else:
         return "fix_execution"
+
 
 workflow.add_conditional_edges("measurer", combined_condition)
 workflow.add_edge("fix_execution", "measurer")
@@ -79,54 +82,6 @@ workflow.set_entry_point("analyzer")
 # Build the graph
 app = workflow.compile()
 
-optimize_me = """def find_top_students(students, grades):
-    # Combine student names with their grades
-    student_grades = []
-    for i in range(len(students)):
-        student_grades.append((students[i], grades[i]))
-
-    # Sort students by their grades in descending order
-    for i in range(len(student_grades)):
-        for j in range(i + 1, len(student_grades)):
-            if student_grades[i][1] < student_grades[j][1]:
-                student_grades[i], student_grades[j] = student_grades[j], student_grades[i]
-
-    # Return the top 3 students
-    return student_grades[:3]
-
-students = ["Alice", "Bob", "Charlie", "David", "Eve"]
-grades = [85, 92, 88, 91, 76]
-
-top_students = find_top_students(students, grades)
-print(top_students)"""
-
-optimize_me2 = """
-function findTopStudents(students, grades) {
-    // Combine student names with their grades
-    let studentGrades = [];
-    for (let i = 0; i < students.length; i++) {
-        studentGrades.push([students[i], grades[i]]);
-    }
-
-    // Sort students by their grades in descending order
-    for (let i = 0; i < studentGrades.length; i++) {
-        for (let j = i + 1; j < studentGrades.length; j++) {
-            if (studentGrades[i][1] < studentGrades[j][1]) {
-                [studentGrades[i], studentGrades[j]] = [studentGrades[j], studentGrades[i]];
-            }
-        }
-    }
-
-    // Return the top 3 students
-    return studentGrades.slice(0, 3);
-}
-
-let students = ["Alice", "Bob", "Charlie", "David", "Eve"];
-let grades = [85, 92, 88, 91, 76];
-
-let topStudents = findTopStudents(students, grades);
-console.log(topStudents);
-"""
 
 res = app.invoke(
     {
