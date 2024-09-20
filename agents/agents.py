@@ -1,4 +1,5 @@
 import os
+import datetime
 from schemas import (
     AgentState,
     OriginalCodeAnalyze,
@@ -32,29 +33,68 @@ def code_measurer_agent(state: AgentState) -> AgentState:
     print("\n** CODE MEASURER AGENT **")
 
     # Ensure 'top_improvements' exists in state
-    if "top_improvements" not in state:
-        state["top_improvements"] = []
+    state.setdefault("top_improvements", [])
 
-    # If there is an improved code available, measure its execution time
-    if "improved_code" in state and state["improved_code"] is not None:
+    # Define the log file path
+    log_directory = "improvements"
+    log_file_name = "improvements.log"
+    log_file_path = os.path.join(log_directory, log_file_name)
+
+    # Ensure the 'improvements' directory exists
+    os.makedirs(log_directory, exist_ok=True)
+
+    # Initialize 'new_optimization_logged' flag if not present
+    if "new_optimization_logged" not in state:
+        state["new_optimization_logged"] = False
+
+    # Get the improved code from the state
+    improved_code = state.get("improved_code")
+
+    # If there is improved code available, measure its execution time
+    if improved_code:
         # Measure the execution time of the improved code
-        state["improved_code"].run_time = measure_execution_time(
-            state["improved_code"].updated_code,
-            state["improved_code"].run_command,
+        improved_code.run_time = measure_execution_time(
+            improved_code.updated_code,
+            improved_code.run_command,
             state["file_extension"],
         )
 
-        # Update top improvements if it's either one of the top 5 fastest or fewer than 5 improvements exist
-        if len(state["top_improvements"]) < 5:
-            state["top_improvements"].append(state["improved_code"])
-        elif state["improved_code"].run_time < state["top_improvements"][-1].run_time:
-            state["top_improvements"][-1] = state["improved_code"]
+        # Update top improvements if necessary
+        top_improvements = state["top_improvements"]
+        if len(top_improvements) < 5:
+            top_improvements.append(improved_code)
+        elif improved_code.run_time < top_improvements[-1].run_time:
+            top_improvements[-1] = improved_code
 
-        # Sort only when necessary to keep the top improvements ordered by run_time
-        state["top_improvements"].sort(key=lambda x: x.run_time)
+        # Sort the top improvements by run_time
+        top_improvements.sort(key=lambda x: x.run_time)
+
+        # Prepare the log entry
+        timestamp = datetime.datetime.now().strftime("%d.%m.%y %H:%M:%S")
+        log_entry = (
+            f"Iteration {state['iteration']} ({timestamp}):\n"
+            f"Execution Time: {improved_code.run_time:.6f} seconds\n"
+            f"Description: {improved_code.changes_summary}\n"
+            f"{improved_code.updated_code}\n\n\n"
+        )
+
+        # Add the "New Optimization Starts" message only once, after the first iteration's log entry
+        if state["iteration"] == 1 and not state["new_optimization_logged"]:
+            log_entry += "=== New Optimization Starts ===\n\n"
+            state["new_optimization_logged"] = True
+
+        # Read existing log entries if any
+        existing_logs = ""
+        if os.path.exists(log_file_path):
+            with open(log_file_path, "r") as log_file:
+                existing_logs = log_file.read()
+
+        # Write the new log entry followed by existing logs
+        with open(log_file_path, "w") as log_file:
+            log_file.write(log_entry + existing_logs)
 
     else:
-        # If no improvements have been made, measure the original code's execution time
+        # Measure the original code's execution time
         measure = measure_execution_time(
             state["original_code"],
             state["code_execution_command"],
@@ -64,7 +104,7 @@ def code_measurer_agent(state: AgentState) -> AgentState:
             state["original_run_time"] = measure
             state["original_execution_success"] = True
         else:
-            print("EPÄONNISTUI")
+            print("Execution failed.")
             state["original_run_time"] = 0
             state["original_execution_success"] = False
 
