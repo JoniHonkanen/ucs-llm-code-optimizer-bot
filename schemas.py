@@ -15,8 +15,11 @@ class OriginalCodeAnalyze(BaseModel):
     run_command: str = Field(
         description="The full command to execute the code/function in a python subprocess"
     )
-    file_extension: str = Field(
-        description="programming language extension for the code file"
+    file_extension: str = (
+        Field(description="programming language extension for the code file"),
+    )
+    context_and_purpose: str = Field(
+        description="A combined description of where the function is used and the reason for its existence or role in the system."
     )
 
 
@@ -69,6 +72,9 @@ class FinalReport(BaseModel):
     filename: str = Field(
         description="A good filename for the code, possibly reflecting the programming language."
     )
+    purpose_consistency: bool = Field(
+        description="Indicates whether the purpose of the original code has been preserved after optimization."
+    )
 
 
 class FixExecutionCommand(BaseModel):
@@ -80,6 +86,7 @@ class FixExecutionCommand(BaseModel):
 
 # Agents state
 class AgentState(TypedDict):
+    orginal_analyze: OriginalCodeAnalyze
     original_code: str
     file_extension: str
     original_execution_success: bool

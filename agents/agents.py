@@ -23,6 +23,7 @@ def code_analyzer_agent(state: AgentState, llm) -> AgentState:
     structured_llm = llm.with_structured_output(OriginalCodeAnalyze)
     prompt = CODE_ANALYSIS_PROMPT.format(original_code=state["original_code"])
     res = structured_llm.invoke(prompt)
+    state["orginal_analyze"] = res
     state["code_execution_command"] = res.run_command
     state["file_extension"] = res.file_extension
     return state
@@ -118,6 +119,7 @@ def code_improver_agent(state: AgentState, llm) -> AgentState:
     print("\n** CODE IMPROVER AGENT **")
     structured_llm = llm.with_structured_output(CodeImprovement)
     if "improved_code" in state and state["improved_code"] is not None:
+        print("OPTIMOIDAAAN!")
         # if not first loop, improved code is the improved code from previous loop
         prompt = OPTIMIZE_OPTIMIZED_CODE_PROMPT.format(
             optimized_code=state["improved_code"].updated_code,
@@ -129,6 +131,7 @@ def code_improver_agent(state: AgentState, llm) -> AgentState:
             original_run_time=state["original_run_time"],
         )
     else:
+        print("EKA LOOPPI")
         # if first loop, improved code is the original code
         prompt = CODE_OPTIMIZATION_SUGGESTION_PROMPT.format(
             code=state["original_code"],
@@ -165,6 +168,7 @@ def final_report_agent(state: AgentState, llm) -> AgentState:
     prompt = FINAL_REPORT_AGENT_PROMPT.format(
         top_improvements=bestImprovementsForLLM,
         original_code=state["original_code"],
+        original_purpose=state["orginal_analyze"].context_and_purpose,
     )
     res = structured_llm.invoke(prompt)
     print(res)
@@ -182,6 +186,8 @@ def final_report_agent(state: AgentState, llm) -> AgentState:
         # Add comments at the beginning of the file
         f.write(f"{res.best_improvement_description}\n")
         f.write(f"{res.performance_gain}\n\n")
+        # Add the purpose consistency check as a comment
+        f.write(f"# Optimization purpose consistency: {res.purpose_consistency}\n\n")
         f.write(res.selected_code)
 
     return state

@@ -39,17 +39,27 @@ CODE_ANALYSIS_PROMPT = ChatPromptTemplate.from_template(
 # Create a prompt template, topic is a variable
 CODE_OPTIMIZATION_SUGGESTION_PROMPT = ChatPromptTemplate.from_template(
     """
-    You are an expert code optimization advisor. Analyze the provided code and ensure that you understand what the code does and what programming language it is written in. Based on this understanding, suggest potential performance improvements, considering factors such as algorithm efficiency, memory usage, and readability. 
+    You are an expert code optimization advisor. Analyze the provided code and ensure that you understand what the code does and what programming language it is written in. Based on this understanding, suggest potential performance improvements, considering factors such as algorithm efficiency, memory usage, and readability.
 
     Suggest different optimization techniques, such as alternative sorting algorithms, data structures, or more efficient algorithms for common operations, while preserving the functionality of the code.
 
     Optimize this code:
     {code}
     
-    Orginal code execution time was {original_run_time} seconds, so try to be better than that.
-    
+    The original code execution time was {original_run_time} seconds, so try to be better than that.
+
     Here is the **original code execution command** that was successfully executed. You must derive a similar execution command for the optimized code, ensuring it runs successfully:
     {original_code_execution}
+    
+    After completing your analysis and optimization, provide the following information:
+    
+    - A **detailed description** of the improvement and its purpose.
+    - A **summary of the changes** made to the original code.
+    - Whether the optimization was **successful**.
+    - The **reduction in time complexity** or other performance benefits.
+    - The **optimized code** after applying the changes.
+    - The **execution command** to run the optimized code.
+    - A **test description** explaining the specific optimization (e.g., algorithm or technique) tested to avoid repeating similar improvements.
     """
 )
 
@@ -142,12 +152,17 @@ FINAL_REPORT_AGENT_PROMPT = ChatPromptTemplate.from_template(
     4. **Ranking of Improvements:** Rank the top improvements by execution time, memory usage, and overall performance. Explain the relative benefits of each, considering the trade-offs between performance, memory efficiency, and maintainability. Ensure the ranking prioritizes both computational efficiency and code maintainability.
 
     5. **Testing and Validation:** Explain the testing and validation process. Confirm that the selected improvement maintains correctness, avoids introducing bugs, and is robust across different test cases.
+    
+    6. **Purpose Consistency:** Verify whether the selected best improvement still performs the same purpose as the original code. Ensure that the optimization did not alter the fundamental goal or role of the code.
 
     **Top Improvements:**
     {top_improvements}
 
     **Original Code:**
     {original_code}
+    
+    **Original Purpose and Context:**
+    {original_purpose}
 
     After completing your analysis, present your final recommendation for the best improvement and justify your decision with data-driven insights.
     """

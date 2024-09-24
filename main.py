@@ -14,7 +14,18 @@ from agents.agents import (
     final_report_agent,
     fix_execution_agent,
 )
-from optimize_functions import optimize_me, optimize_me2, optimize_me3
+from optimize_functions import (
+    optimize_me,
+    optimize_me2,
+    optimize_me3,
+    optimize_me4,
+    optimize_me5,
+    optimize_me6,
+    optimize_me7,
+    optimize_me8,
+    optimize_me9,
+    optimize_me10,
+)
 
 # .env file is used to store the api key
 load_dotenv()
@@ -63,7 +74,7 @@ workflow.add_edge("analyzer", "measurer")
 
 
 def combined_condition(state: AgentState):
-    if state["original_execution_success"] and state["iteration"] < 3:
+    if state["original_execution_success"] and state["iteration"] < 2:
         return "improver"
     elif state["original_execution_success"]:
         return "report"
@@ -86,9 +97,9 @@ app = workflow.compile()
 res = app.invoke(
     {
         "messages": [
-            HumanMessage(content=optimize_me),
+            HumanMessage(content=optimize_me10),
         ],
-        "original_code": optimize_me,
+        "original_code": optimize_me10,
         "iteration": 0,
     }
 )
