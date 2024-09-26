@@ -95,25 +95,20 @@ console.log(sumElements(numbers));
 
 # JavaScript function
 optimize_me6 = """
-function findPrimes(n) {
-    let primes = [];
-    for (let i = 2; i <= n; i++) {
-        let isPrime = true;
-        for (let j = 2; j < i; j++) {
-            if (i % j === 0) {
-                isPrime = false;
-                break;
-            }
-        }
-        if (isPrime) {
-            primes.push(i);
-        }
-    }
-    return primes;
-}
+def find_primes(n):
+    primes = []
+    for i in range(2, n + 1):
+        is_prime = True
+        for j in range(2, int(i ** 0.5) + 1):
+            if i % j == 0:
+                is_prime = False
+                break
+        if is_prime:
+            primes.append(i)
+    return primes
 
-let n = 50;
-console.log(findPrimes(n));
+n = 50
+print(find_primes(n))
 """
 
 # Python function
@@ -154,7 +149,7 @@ def process_data(data):
     
     return final_result
 """
-#Recursive path finding
+# Recursive path finding
 #
 optimize_me8 = """
 def path_finder(grid):
@@ -194,10 +189,10 @@ def path_finder(grid):
     return best_path, best_sum
 """
 
-#Here's a more complicated pathfinding task that involves obstacles,
+# Here's a more complicated pathfinding task that involves obstacles,
 # weights, and diagonally permissible movements.
 
-#You can move in 8 possible directions (up, down, left, right, and the 4 diagonals),
+# You can move in 8 possible directions (up, down, left, right, and the 4 diagonals),
 # and the task is to find the minimum cost path from the top-left corner (0,0) to the bottom-right corner
 # (rows-1, cols-1), avoiding obstacles.
 optimize_me9 = """

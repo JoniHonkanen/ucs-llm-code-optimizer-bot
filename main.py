@@ -75,7 +75,7 @@ workflow.add_edge("analyzer", "measurer")
 
 
 def combined_condition(state: AgentState):
-    if state["original_execution_success"] and state["iteration"] < 3:
+    if state["original_execution_success"] and state["iteration"] < 16:
         return "improver"
     elif state["original_execution_success"]:
         return "report"
@@ -98,9 +98,9 @@ config = RunnableConfig(recursion_limit=50)
 res = app.invoke(
     {
         "messages": [
-            HumanMessage(content=optimize_me7),
+            HumanMessage(content=optimize_me6),
         ],
-        "original_code": optimize_me7,
+        "original_code": optimize_me6,
         "iteration": 0,
     },
     config=config,
