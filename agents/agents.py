@@ -54,30 +54,48 @@ def code_measurer_agent(state: AgentState) -> AgentState:
     # If there is improved code available, measure its execution time
     if improved_code:
         # Measure the execution time of the improved code
-        improved_code.run_time = measure_execution_time(
+        run = measure_execution_time(
             improved_code.updated_code,
             improved_code.run_command,
             state["file_extension"],
         )
 
-        # Update top improvements if necessary
-        top_improvements = state["top_improvements"]
-        if len(top_improvements) < 5:
-            top_improvements.append(improved_code)
-        elif improved_code.run_time < top_improvements[-1].run_time:
-            top_improvements[-1] = improved_code
+        improved_code.run_time = run
+        if run == 0:
+            print("Execution failed.")
+            improved_code.success = False
+        else:
+            improved_code.success = True
 
-        # Sort the top improvements by run_time
-        top_improvements.sort(key=lambda x: x.run_time)
-
-        # Prepare the log entry
+        # Prepare the timestamp
         timestamp = datetime.datetime.now().strftime("%d.%m.%y %H:%M:%S")
-        log_entry = (
-            f"Iteration {state['iteration']} ({timestamp}):\n"
-            f"Execution Time: {improved_code.run_time:.6f} seconds\n"
-            f"Description: {improved_code.changes_summary}\n"
-            f"{improved_code.updated_code}\n\n\n"
-        )
+
+        # Prepare the log entry, including the code even if execution fails
+        if improved_code.success:
+            log_entry = (
+                f"Iteration {state['iteration']} ({timestamp}):\n"
+                f"Execution Time: {improved_code.run_time:.6f} seconds\n"
+                f"Description: {improved_code.changes_summary}\n"
+                f"{improved_code.updated_code}\n\n\n"
+            )
+        else:
+            log_entry = (
+                f"Iteration {state['iteration']} ({timestamp}):\n"
+                "Execution failed.\n"
+                f"Description: {improved_code.changes_summary}\n"
+                f"{improved_code.updated_code}\n\n\n"
+            )
+
+        # If execution is successful, add to top improvements
+        if improved_code.success:
+            top_improvements = state["top_improvements"]
+            if len(top_improvements) < 5:
+                top_improvements.append(improved_code)
+            elif improved_code.run_time < top_improvements[-1].run_time:
+                top_improvements[-1] = improved_code
+
+            # Sort the top improvements by run_time
+            top_improvements.sort(key=lambda x: x.run_time)
 
         # Add the "New Optimization Starts" message only once, after the first iteration's log entry
         if state["iteration"] == 1 and not state["new_optimization_logged"]:
@@ -105,7 +123,7 @@ def code_measurer_agent(state: AgentState) -> AgentState:
             state["original_run_time"] = measure
             state["original_execution_success"] = True
         else:
-            print("Execution failed.")
+            print("First Execution failed.")
             state["original_run_time"] = 0
             state["original_execution_success"] = False
 
