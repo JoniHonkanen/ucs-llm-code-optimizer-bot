@@ -2,6 +2,7 @@ import time
 import os
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
+from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
 from dotenv import load_dotenv
 
@@ -74,7 +75,7 @@ workflow.add_edge("analyzer", "measurer")
 
 
 def combined_condition(state: AgentState):
-    if state["original_execution_success"] and state["iteration"] < 2:
+    if state["original_execution_success"] and state["iteration"] < 3:
         return "improver"
     elif state["original_execution_success"]:
         return "report"
@@ -93,15 +94,16 @@ workflow.set_entry_point("analyzer")
 # Build the graph
 app = workflow.compile()
 
-
+config = RunnableConfig(recursion_limit=50)
 res = app.invoke(
     {
         "messages": [
-            HumanMessage(content=optimize_me10),
+            HumanMessage(content=optimize_me7),
         ],
-        "original_code": optimize_me10,
+        "original_code": optimize_me7,
         "iteration": 0,
-    }
+    },
+    config=config,
 )
 
 print("VALMIS :)")
