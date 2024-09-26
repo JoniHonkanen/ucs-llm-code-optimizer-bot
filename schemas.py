@@ -15,8 +15,8 @@ class OriginalCodeAnalyze(BaseModel):
     run_command: str = Field(
         description="The full command to execute the code/function in a python subprocess"
     )
-    file_extension: str = (
-        Field(description="programming language extension for the code file"),
+    file_extension: str = Field(
+        description="programming language extension for the code file"
     )
     context_and_purpose: str = Field(
         description="A combined description of where the function is used and the reason for its existence or role in the system."
@@ -35,7 +35,7 @@ class CodeImprovement(BaseModel):
         description="Summary of the changes made to the original code as part of this improvement."
     )
     success: bool = Field(
-        None,
+        False,
         description="This will be tested later, so it is not required to be filled in.",
     )
     complexity_reduction: float = Field(
@@ -49,7 +49,8 @@ class CodeImprovement(BaseModel):
         description="This will be tested later, so it is not required to be filled in.",
     )
     test_description: str = Field(
-        description="A concise note on what was optimized (e.g., algorithm change) to avoid repeating similar improvements."
+        default="No specific test description provided.",
+        description="A concise note on what was optimized (e.g., algorithm change) to avoid repeating similar improvements.",
     )
     run_command: str = Field(
         description="The full command to execute the code/function in a python subprocess"
