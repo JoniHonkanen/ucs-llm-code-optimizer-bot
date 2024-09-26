@@ -35,7 +35,8 @@ class CodeImprovement(BaseModel):
         description="Summary of the changes made to the original code as part of this improvement."
     )
     success: bool = Field(
-        description="Indicates whether the improvement was successfully applied without errors."
+        None,
+        description="This will be tested later, so it is not required to be filled in.",
     )
     complexity_reduction: float = Field(
         description="Reduction in time complexity or runtime performance, expressed as a factor (e.g., 0.5 means 50% reduction)."

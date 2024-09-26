@@ -65,21 +65,24 @@ CODE_OPTIMIZATION_SUGGESTION_PROMPT = ChatPromptTemplate.from_template(
 
 OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
     """
-    You are a code optimization expert tasked with further optimizing the provided code. Your goal is to maximize performance without compromising correctness or functionality. Review the optimizations made so far and propose more improvements.
+    You are a code optimization expert tasked with further optimizing the provided code, which has already undergone several optimizations. Your goal is to maximize performance of the **latest optimized code** without compromising correctness or functionality. Review the optimizations made so far and propose new improvements, avoiding those that have already been tested.
 
     **Your Key Responsibilities:**
     
-    1. **Identify Bottlenecks**:
+    1. **Identify Remaining Bottlenecks**:
        Use profiling or benchmarking data to identify areas of the current optimized code that are still inefficient.
     
     2. **Complexity Analysis**:
-       Provide a detailed complexity analysis (time and space) of both the original and optimized code. For each new optimization you propose, include the impact on complexity.
+       Provide a detailed complexity analysis (time and space) of both the original and currently optimized code. For each new optimization you propose, include the impact on complexity.
     
     3. **Advanced Optimization Techniques**:
        Focus on improvements in:
        - Algorithm efficiency (sorting, searching, data handling, etc.).
        - Data structures that reduce memory usage and computation overhead.
        - Refactoring to remove redundancies or unnecessary operations.
+       - Parallelization and concurrency where applicable.
+       
+       **Note**: Ensure you focus on optimizing the **latest optimized code** provided, and avoid suggesting improvements that have already been tested and documented in **'Tested Improvements So Far'**.
 
     4. **Compare Multiple Approaches**:
        Where applicable, propose alternative solutions, comparing their performance, complexity, and trade-offs. Always aim to choose the most effective approach.
@@ -90,8 +93,8 @@ OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
     6. **Trade-offs**:
        Consider the trade-offs between performance, code readability, and maintainability. Prioritize significant performance gains over minor readability issues, but avoid making the code unmanageable.
 
-    **Provided Code Details:**
-    
+    **Provided Code Details**:
+
     - **Optimized Code**: 
       {optimized_code}
 
@@ -114,11 +117,11 @@ OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
       {original_code_execution}
 
     **Next Steps**:
-    
-    1. Propose and explain optimizations to improve the current performance.
-    
-    2. Derive a new execution command for running the optimized code. You must:
-       - Base it on the original execution command but adapt it for the optimized code.
+
+    1. Propose and explain **new optimizations** to improve the performance of the **current optimized code** further. **Avoid proposing improvements that have already been tested** (as listed in **'Tested Improvements So Far'**).
+
+    2. Derive a new execution command for running the newly optimized code. You must:
+       - Base it on the original execution command but adapt it for the new optimized code.
        - Ensure the command is valid and executable from a file.
 
        **Examples of execution commands**:
@@ -132,8 +135,13 @@ OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
     3. Ensure the command is suitable for running in a subprocess, and the code is executed from a file.
 
     **Benchmark the New Optimizations**:
-    
+
     Provide an estimate of the expected execution time for your new optimizations compared to both the original and the currently optimized versions.
+
+    **Reminder**:
+
+    - Focus on optimizing the **latest optimized code** provided.
+    - **Do not propose or test improvements that have already been tested** and listed in **'Tested Improvements So Far'**.
     """
 )
 
