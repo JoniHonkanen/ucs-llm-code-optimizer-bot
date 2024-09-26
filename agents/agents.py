@@ -105,11 +105,11 @@ def code_measurer_agent(state: AgentState) -> AgentState:
         # Read existing log entries if any
         existing_logs = ""
         if os.path.exists(log_file_path):
-            with open(log_file_path, "r") as log_file:
+            with open(log_file_path, "r", encoding="utf-8") as log_file:
                 existing_logs = log_file.read()
 
         # Write the new log entry followed by existing logs
-        with open(log_file_path, "w") as log_file:
+        with open(log_file_path, "w", encoding="utf-8") as log_file:
             log_file.write(log_entry + existing_logs)
 
     else:
@@ -200,7 +200,7 @@ def final_report_agent(state: AgentState, llm) -> AgentState:
     filepath = os.path.join(improvements_folder, res.filename)
 
     # save the final report to a programming file using res.filename
-    with open(filepath, "w") as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         # Add comments at the beginning of the file
         f.write(f"{res.best_improvement_description}\n")
         f.write(f"{res.performance_gain}\n\n")
