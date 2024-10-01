@@ -75,12 +75,21 @@ workflow.add_edge("analyzer", "measurer")
 
 
 def combined_condition(state: AgentState):
-    if state["original_execution_success"] and state["iteration"] < 16:
+    max_optimization_iterations = 10  # Maximum iterations for code optimization
+    max_debug_iterations = 5  # Maximum iterations for debugging
+    if (
+        state["original_execution_success"]
+        and state["iteration"] < max_optimization_iterations
+    ):
         return "improver"
     elif state["original_execution_success"]:
         return "report"
     else:
-        return "fix_execution"
+        if state["debug_iteration"] < max_debug_iterations:
+            return "fix_execution"
+        else:
+            print("Could not fix the execution issue!.")
+            return END
 
 
 workflow.add_conditional_edges("measurer", combined_condition)
@@ -98,10 +107,11 @@ config = RunnableConfig(recursion_limit=50)
 res = app.invoke(
     {
         "messages": [
-            HumanMessage(content=optimize_me6),
+            HumanMessage(content=optimize_me7),
         ],
-        "original_code": optimize_me6,
+        "original_code": optimize_me7,
         "iteration": 0,
+        "debug_iteration": 0,
     },
     config=config,
 )

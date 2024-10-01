@@ -65,43 +65,41 @@ CODE_OPTIMIZATION_SUGGESTION_PROMPT = ChatPromptTemplate.from_template(
 
 OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
     """
-    You are a code optimization expert tasked with improving the provided code, which has already undergone several optimizations. Your goal is to produce code that is **faster, more memory-efficient, and more readable** than both the **original code** and the **latest optimized version**. All improvements must maintain the code's functionality while delivering measurable performance gains.
+    You are a code optimization expert tasked with improving provided code that has already undergone several optimizations. Your goal is to produce code that is **faster, more memory-efficient, and more readable** than both the **original code** and the **latest optimized version**. All improvements must preserve functionality while delivering measurable performance gains.
 
     **Your Key Responsibilities:**
 
     1. **Preserve Original Purpose and Correctness**:
-       Ensure that the optimized code retains the same functionality and purpose as the original code, without altering its intended behavior. All changes must preserve the correctness of the output.
+       Ensure that the optimized code retains the functionality and purpose of the original code without altering its intended behavior. All changes must maintain the correctness of the output.
 
-    2. **Identify Bottlenecks for Improvement**:
-       Use profiling or benchmarking data to identify areas where the current optimized code is still inefficient. Prioritize optimizations that have the most impact on runtime and memory usage.
+    2. **Identify and Address Performance Bottlenecks**:
+       Use profiling or benchmarking data to identify areas where the current optimized code is still inefficient. Prioritize impactful optimizations that target runtime and memory usage.
 
-    3. **Complexity and Resource Usage Analysis**:
-       Provide a detailed analysis of both the original and the currently optimized code. Assess time complexity, memory usage, and any other significant resource considerations. Describe how each new improvement affects these factors.
+    3. **Analyze Complexity and Resource Usage**:
+       Provide a detailed analysis of both the original and current optimized code. Assess time complexity, memory usage, and other resource considerations. Describe how each new improvement affects these metrics.
 
-    4. **Propose Better, Unique Optimizations**:
-       Propose optimizations that are distinct and better in performance, memory efficiency, and readability. Prioritize:
-       - Improving algorithm efficiency (sorting, searching, data handling, etc.).
-       - Replacing data structures to reduce memory footprint or computation time.
-       - Eliminating duplicated or redundant code blocks.
-       - Introducing parallelization or concurrency where it offers clear gains.
+    4. **Propose Unique, Impactful Optimizations**:
+       Propose optimizations that are clearly better in terms of performance, memory efficiency, and readability, while being significantly distinct from previously tested improvements listed in **'Tested Improvements So Far'**. Consider:
+       - Enhancing algorithm efficiency (sorting, searching, data handling, etc.).
+       - Replacing data structures to reduce memory usage or computation time.
+       - Eliminating redundant code or unnecessary operations.
+       - Leveraging parallelization or concurrency for clear gains in performance.
 
-       **Note**: The proposed optimization must significantly differ from previously tested improvements, which are listed in **'Tested Improvements So Far'**.
-
-    5. **Enhance Code Readability and Maintainability**:
-       Strive to make the code not only more efficient but also easier to read and maintain. This includes clear naming conventions, modularity, and eliminating unnecessary complexity.
+    5. **Improve Code Readability and Maintainability**:
+       Make the code not only efficient but also easy to read and maintain. This includes clear naming conventions, modularity, and reducing unnecessary complexity.
 
     6. **Refactor for Conciseness and Efficiency**:
-       Refactor the code to remove any unnecessary operations or redundancy. Ensure it remains concise while balancing performance gains with readability.
+       Refactor the code to remove any unnecessary operations or redundancies. Keep it concise, balancing performance gains with readability.
 
-    7. **Testing, Validation & Failure Handling**:
-       Rigorously test the optimized code for correctness and edge cases. Confirm that the behavior of the code remains identical to the original.
-       - If the execution time is `0`, the optimization is considered a failure, indicating it did not execute correctly.
+    7. **Testing, Validation & Correctness Assurance**:
+       Thoroughly test the optimized code for correctness, covering various input sizes and edge cases. Confirm that the behavior remains identical to the original.
+       - **Failure Condition**: If the execution time is `0`, consider the optimization to have failed (indicating incorrect execution or an error).
 
-    8. **Benchmark, Compare & Validate Improvements**:
-       Compare multiple approaches, considering their performance, complexity, and trade-offs. Provide benchmarks and clear evidence of how each new optimization is better (faster, more memory-efficient, and/or more readable) than both the original and previously optimized versions.
+    8. **Benchmark and Validate Improvements**:
+       Provide comprehensive benchmarks of the new optimizations against both the original and previously optimized versions, considering performance, complexity, and trade-offs. Clearly indicate how the new changes improve execution time, memory usage, and code readability.
 
-    9. **Derive Execution Command**:
-       Formulate a new execution command to run the optimized code based on the original command. This command must be executable from a file in a subprocess.
+    9. **Derive New Execution Command for Optimized Code**:
+       Formulate a new execution command for running the optimized code based on the original command provided. This command must be executable as a file in a subprocess.
 
        **Examples of execution commands**:
        - Python: `python <filepath>`
@@ -109,7 +107,7 @@ OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
        - C: `gcc <filepath> -o <output_binary> && ./<output_binary>`
        - JavaScript: `node <filepath>`
        
-       **Important**: The placeholder `<filepath>` will later be replaced with the actual file path during execution.
+       **Note**: The placeholder `<filepath>` will be replaced with the actual file path during execution. Ensure that this command accurately reflects the necessary steps to compile or run the optimized code.
 
     **Provided Code Details**:
 
@@ -139,41 +137,55 @@ OPTIMIZE_OPTIMIZED_CODE_PROMPT = ChatPromptTemplate.from_template(
 
     1. Propose and explain **new optimizations** to improve the performance, memory usage, and readability of the **current optimized code** further. Ensure optimizations are distinct from those in **'Tested Improvements So Far'**.
 
-    2. **Validate Functional Consistency**: Verify that the optimized code retains the same functionality and purpose as the original code. The behavior and output should be identical.
+    2. **Validate Functional Consistency**: Verify that the optimized code retains the same functionality and purpose as the original code, ensuring the output remains identical.
 
-    3. **Ensure Transformative Optimization**: Compare the new optimization against both the **original** and **last optimized code**. If the proposed changes are too similar or marginal, refine your approach to achieve a significant performance boost, memory reduction, or readability enhancement.
+    3. **Ensure Transformative Optimization**: Compare the new optimization against both the **original** and **last optimized code**. If the proposed changes are too similar or marginal, refine the approach to achieve a significant performance boost, memory reduction, or readability enhancement.
 
     4. **Benchmark the New Optimizations**:
-       Provide a comprehensive benchmark of the new optimization's performance, memory usage, and readability compared to both the original and previously optimized code.
+       Provide comprehensive benchmarks detailing the new optimization's performance, memory usage, and readability relative to both the original and previously optimized code.
+
+    **Final Task**:
+    
+    Return a response that includes all fields necessary for the `CodeImprovement` schema:
+
+    - **description**: A detailed explanation of the improvement and its purpose.
+    - **changes_summary**: Summary of the changes made to the original code as part of this improvement.
+    - **complexity_reduction**: Estimated reduction in time complexity or runtime performance as a factor (e.g., `0.5` for a 50% reduction).
+    - **updated_code**: The code after applying the improvement, ensuring it's more efficient while preserving functionality.
+    - **test_description**: A concise note describing what was optimized (e.g., algorithm change) to avoid repeating similar improvements.
+    - **run_command**: The full command to execute the optimized code in a Python subprocess.
 
     **Reminder**:
-
-    - Focus on producing code that is **better than both the original and last optimized code** in terms of performance, memory usage, and readability.
-    - **Do not propose or test improvements that have already been tested** as listed in **'Tested Improvements So Far'.** Always introduce unique and impactful optimizations.
-    - **Ensure the optimized code is free of duplicated code and unnecessary operations.**
-    - **Ensure all new optimizations are distinct and transformative compared to the last optimized code.**
-    - **Indicate whether the purpose and functionality of the original code have been preserved after optimization.**
+    - Produce code that is **better than both the original and last optimized code** in terms of performance, memory usage, and readability.
+    - **Do not propose or test already tested improvements** as listed in **'Tested Improvements So Far'.** All new optimizations must be distinct and impactful.
+    - **Ensure the optimized code is free from duplicated code or unnecessary operations.**
+    - **Ensure the purpose and functionality of the original code are preserved.**
     """
 )
 
 
 FINAL_REPORT_AGENT_PROMPT = ChatPromptTemplate.from_template(
     """
-    You are the **Final Report Agent**, tasked with analyzing and compiling a comprehensive report on the code optimization process. Your goal is to evaluate and compare the improvements made to the original code, and provide the final recommendation for the best-optimized code among the top improvements. The report should include:
+    You are the **Final Report Agent**, responsible for analyzing and compiling a thorough evaluation of multiple optimized versions of code that achieve the same objective but differ in their algorithms and performance. Your task is to compare these versions and provide a data-driven recommendation for the best one. Your evaluation should focus on key performance criteria, including execution speed, algorithmic efficiency, memory usage, and code maintainability.
 
-    1. **Summary of Improvements:** Summarize each of the top improvements, detailing the specific optimizations applied, their purpose, and how they impacted performance (e.g., reduction in execution time, memory usage, or complexity).
+    The report should include the following sections:
 
-    2. **Comparison with Original Code:** Compare the original code with each of the top improvements, highlighting the main differences in algorithm, structure, or logic. Explain how these changes address the inefficiencies in the original version.
+    1. **Summary of Each Optimized Version:** Provide a concise summary of each version, detailing the specific algorithm or approach used. Explain the intended purpose of any unique optimization or strategy within the version and its impact on performance metrics (e.g., execution time, memory usage, or complexity). Highlight any significant trade-offs or side effects of each approach.
 
-    3. **Best Improvement Selection:** Based on execution time, memory usage, code readability, simplicity, and overall performance, select the best improvement. Justify your choice with specific metrics (e.g., performance gain, memory efficiency, simplicity, correctness) and explain how it strikes the best balance between these factors. 
-    For example: "This improvement strikes the best balance between simplicity, performance, and correctness. It is the most appropriate choice for efficiently solving the problem while maintaining readability and robustness."
-    Discuss why this improvement is preferred over others, supported by data-driven insights.
+    2. **Comparison Across All Versions:** Compare all versions against each other, focusing on major differences in algorithms, structure, and logic. Clearly articulate how each version's approach addresses specific inefficiencies and how these differences affect performance.
 
-    4. **Ranking of Improvements:** Rank the top improvements by execution time, memory usage, and overall performance. Explain the relative benefits of each, considering the trade-offs between performance, memory efficiency, and maintainability. Ensure the ranking prioritizes both computational efficiency and code maintainability.
+    3. **Metrics-Based Evaluation:** Evaluate each version based on the following criteria:
+       - **Execution Time:** Measure and compare the average time taken to run each version across different input sizes.
+       - **Memory Usage:** Track and compare peak memory consumption for each version.
+       - **Algorithmic Complexity:** Analyze and compare the computational complexity of each version.
+       - **Readability & Maintainability:** Assess the clarity and modifiability of the code.
+       - Provide a ranking or scoring system to objectively compare how well each version performs in these areas.
 
-    5. **Testing and Validation:** Explain the testing and validation process. Confirm that the selected improvement maintains correctness, avoids introducing bugs, and is robust across different test cases.
-    
-    6. **Purpose Consistency:** Verify whether the selected best improvement still performs the same purpose as the original code. Ensure that the optimization did not alter the fundamental goal or role of the code.
+    4. **Selection of Best Version:** Select the version that offers the best balance across execution time, memory usage, complexity, readability, and maintainability. Justify your choice with quantitative data and qualitative analysis, discussing how the selected version outperforms the others while maintaining correctness and efficiency.
+
+    5. **Edge Case Testing and Validation:** Describe the testing process used to validate all versions, including tests on various input scenarios (small, large, edge cases, and stress tests). Confirm that the chosen version maintains correctness, robustness, and does not introduce any bugs across these test cases.
+
+    6. **Purpose Consistency Check:** Verify that the selected version retains the original purpose and behavior of the code. Ensure that optimizations did not alter the fundamental goal or functionality.
 
     **Top Improvements:**
     {top_improvements}
@@ -184,7 +196,7 @@ FINAL_REPORT_AGENT_PROMPT = ChatPromptTemplate.from_template(
     **Original Purpose and Context:**
     {original_purpose}
 
-    After completing your analysis, present your final recommendation for the best improvement and justify your decision with data-driven insights.
+    Conclude your report with a final recommendation for the best optimized version, providing a data-driven justification for your decision. Clearly explain how it strikes an optimal balance between computational efficiency, memory usage, maintainability, and consistency of purpose.
     """
 )
 

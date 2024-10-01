@@ -220,4 +220,7 @@ def fix_execution_agent(state: AgentState, llm) -> AgentState:
     res = structured_llm.invoke(prompt)
     state["code_execution_command"] = res.new_execution_command
 
+    # Increment the debug iteration counter
+    state["debug_iteration"] += 1
+
     return state

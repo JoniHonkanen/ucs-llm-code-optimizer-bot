@@ -99,4 +99,5 @@ class AgentState(TypedDict):
     tested_improvements: List[str]
     messages: List[str]
     iteration: int
+    debug_iteration: int  # New field for debugging iterations
     final: FinalReport
